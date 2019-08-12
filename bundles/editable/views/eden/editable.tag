@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <div class="grid-stack-item" data-gs-x="0" data-gs-y="0" data-gs-width="1" data-gs-height="1">
+    <div class="grid-stack-item grid-stack-item-add" data-gs-x={ placement.get('add._grid.x') || '0' } data-gs-y={ placement.get('add._grid.y') || '0' } data-gs-width={ placement.get('add._grid.w') || '6' } data-gs-height={ placement.get('add._grid.h') || '2' }>
       <div class="grid-stack-item-content">
         <button ref="on-add" class="grid-add" onclick={ onAddPress }>
           Add Widget
@@ -79,15 +79,45 @@
       // get uuid
       const dotProp = require('dot-prop-immutable');
 
+      // lowest rightest
+      const lowestRightest = (this.placement.get('blocks') || []).reduce((accum, block) => {
+        // get bottommost
+        const right = block.x + block.w;
+        const bottom = block.h + block.y;
+
+        // lower bottom
+        if (bottom > (accum.h + accum.y)) {
+          // return
+          return block;
+        } else if (bottom === (accum.h + accum.y) && right > (accum.x + accum.w)) {
+          // return block
+          return block;
+        }
+
+        // return accumulated
+        return accum;
+      }, this.placement.get('add._grid') || {
+        w : 6,
+        h : 2,
+        x : 0,
+        y : 0
+      });
+
+      console.log(lowestRightest);
+
+      // bottom
+      const right = lowestRightest.x + lowestRightest.w;
+      const bottom = lowestRightest.y + lowestRightest.h;
+
       // create block
       let block = {
         'uuid' : uuid(),
         'type' : type,
         '_grid' : {
-          w : 1,
-          h : 1,
-          x : 0,
-          y : 0,
+          w : 6,
+          h : 2,
+          x : (right >= 12 ? 0 : right),
+          y : (right >= 12 ? bottom : bottom),
         },
       };
 
@@ -245,15 +275,25 @@
           const block = this.placement.get('blocks').find(b => b.uuid === jQuery('[data-block]', item).attr('data-block'));
           
           // check block
-          if (!block) return;
-
-          // set grid
-          block._grid = {
-            x : data.gsX,
-            y : data.gsY,
-            h : data.gsHeight,
-            w : data.gsWidth,
-          };
+          if (child.is('.grid-stack-item-add')) {
+            // set add grid
+            this.placement.set('add', {
+              _grid : {
+                x : data.gsX,
+                y : data.gsY,
+                h : data.gsHeight,
+                w : data.gsWidth,
+              }
+            });
+          } else {
+            // set grid
+            block._grid = {
+              x : data.gsX,
+              y : data.gsY,
+              h : data.gsHeight,
+              w : data.gsWidth,
+            };
+          }
         });
 
         // save

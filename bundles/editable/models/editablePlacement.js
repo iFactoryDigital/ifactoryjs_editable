@@ -15,6 +15,7 @@ class EditablePlacement extends Model {
     // return placement
     return {
       id     : this.get('_id') ? this.get('_id').toString() : null,
+      add    : this.get('add'),
       type   : this.get('type'),
       name   : this.get('name'),
       blocks : req ? (await Promise.all((this.get('blocks') || []).map(async (block) => {

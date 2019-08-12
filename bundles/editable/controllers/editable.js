@@ -240,6 +240,7 @@ class EditableController extends Controller {
     }
 
     // update placement
+    placement.set('add', req.body.add);
     placement.set('name', req.body.name);
     placement.set('blocks', req.body.blocks);
     placement.set('position', req.body.position);

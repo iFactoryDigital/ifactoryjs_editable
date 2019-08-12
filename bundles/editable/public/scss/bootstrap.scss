@@ -35,6 +35,18 @@ $animation_speed: .2s;
           background : darken($white, 0.2);
         }
       }
+
+      > div {
+        height : 100%;
+
+        > block {
+          height : 100%;
+
+          > * {
+            height : 100%;
+          }
+        }
+      }
     }
   }
 }
