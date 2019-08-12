@@ -1,0 +1,38 @@
+{
+  "name": "@edenjs/editable",
+  "description": "",
+  "version": "0.0.1",
+  "dependencies": {
+    "gridstack": "^0.4.0",
+    "gridster": "^0.5.6",
+    "jquery-ui": "^1.12.1"
+  },
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eden-js/cms.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eden-js/cms/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "homepage": "https://github.com/eden-js/cms#readme",
+  "devDependencies": {
+    "@edenjs/eslint-config-eden": "^2.0.14",
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.14.2"
+  }
+}

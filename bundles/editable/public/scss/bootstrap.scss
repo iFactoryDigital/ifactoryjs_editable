@@ -1,0 +1,40 @@
+//
+// IMPORT LOCAL SCSS
+//
+
+
+$gridstack-columns: $grid-columns;
+$horizontal_padding: $grid-gutter-width;
+$vertical_padding: $grid-gutter-width;
+$animation_speed: .2s;
+
+@import '~gridstack/src/gridstack';
+@import '~gridstack/src/gridstack-extra';
+
+// alter stack
+.grid-stack {
+  margin-left : -($horizontal_padding / 2);
+  margin-right : -($horizontal_padding / 2);
+
+  // alter item
+  > .grid-stack-item {
+
+    // alter content
+    .grid-stack-item-content {
+      // set background
+      background : $white;
+  
+      .grid-add {
+        width      : calc(100% - #{$spacer});
+        height     : calc(100% - #{$spacer});
+        margin     : ($spacer / 2);
+        border     : none;
+        background : none;
+  
+        &:hover {
+          background : darken($white, 0.2);
+        }
+      }
+    }
+  }
+}
