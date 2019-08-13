@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <div class="grid-stack-item grid-stack-item-add" data-gs-x={ placement.get('add._grid.x') || '0' } data-gs-y={ placement.get('add._grid.y') || '0' } data-gs-width={ placement.get('add._grid.w') || '6' } data-gs-height={ placement.get('add._grid.h') || '2' }>
+    <div class="grid-stack-item grid-stack-item-add" data-gs-x={ placement.get('add._grid.x') || '0' } data-gs-y={ placement.get('add._grid.y') || '0' } data-gs-width={ placement.get('add._grid.w') || '4' } data-gs-height={ placement.get('add._grid.h') || '2' }>
       <div class="grid-stack-item-content">
         <button ref="on-add" class="grid-add" onclick={ onAddPress }>
           Add Widget
@@ -82,44 +82,55 @@
       // lowest rightest
       const lowestRightest = (this.placement.get('blocks') || []).reduce((accum, block) => {
         // get bottommost
-        const right = block.x + block.w;
-        const bottom = block.h + block.y;
+        const right = parseInt(block._grid.x) + parseInt(block._grid.w);
+        const bottom = parseInt(block._grid.h) + parseInt(block._grid.y);
+
+        const aRight = (parseInt(accum._grid.x) + parseInt(accum._grid.w));
+        const aBottom = (parseInt(accum._grid.h) + parseInt(accum._grid.y));
 
         // lower bottom
-        if (bottom > (accum.h + accum.y)) {
+        if (bottom > aBottom) {
           // return
           return block;
-        } else if (bottom === (accum.h + accum.y) && right > (accum.x + accum.w)) {
+        } else if (bottom === aBottom && right > aRight) {
           // return block
           return block;
         }
 
         // return accumulated
         return accum;
-      }, this.placement.get('add._grid') || {
-        w : 6,
-        h : 2,
-        x : 0,
-        y : 0
+      }, {
+        _grid : this.placement.get('add._grid') || {
+          w : 4,
+          h : 2,
+          x : 0,
+          y : 0
+        }
       });
 
-      console.log(lowestRightest);
-
       // bottom
-      const right = lowestRightest.x + lowestRightest.w;
-      const bottom = lowestRightest.y + lowestRightest.h;
+      const right = lowestRightest._grid.x + lowestRightest._grid.w;
+      const bottom = lowestRightest._grid.y + lowestRightest._grid.h;
 
       // create block
       let block = {
         'uuid' : uuid(),
         'type' : type,
-        '_grid' : {
-          w : 6,
+        '_grid' : this.placement.get('add._grid') || {
+          w : 4,
           h : 2,
-          x : (right >= 12 ? 0 : right),
-          y : (right >= 12 ? bottom : bottom),
+          x : 0,
+          y : 0
         },
       };
+
+      // set new add placement
+      this.placement.set('add._grid', {
+        w : 4,
+        h : 2,
+        x : (right >= 12 ? 0 : right),
+        y : (right >= 12 ? bottom : bottom),
+      });
 
       // check positions
       if (!this.placement.get('blocks')) this.placement.set('blocks', []);
@@ -331,7 +342,7 @@
       if (!this.eden.frontend) return;
 
       // set preview
-      this.preview = !!(!this.acl.validate(opts.acl || 'admin') || opts.preview);
+      this.preview = !this.acl.validate(opts.acl || 'admin');
     });
 
     /**
@@ -342,6 +353,9 @@
     this.on('mount', () => {
       // check frontend
       if (!this.eden.frontend) return;
+
+      // set preview
+      this.preview = !this.acl.validate(opts.acl || 'admin');
 
       // set placement
       this.placement = opts.placement ? (opts.model ? this.parent.placement : this.model('placement', opts.placement)) : this.model('placement', {
