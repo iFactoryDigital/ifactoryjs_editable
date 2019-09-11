@@ -6,7 +6,7 @@
         <h5>
           Select Block
         </h5>
-        
+
         <ul class="nav nav-tabs card-header-tabs">
           <li class="nav-item" each={ tab, i in getTabs() }>
             <button class={ 'nav-link' : true, 'active' : isTab(tab) } onclick={ onTab }>
@@ -15,7 +15,7 @@
           </li>
         </ul>
       </div>
-      
+
       <div class="card-body">
         <div class="form-group">
           <input class="form-control" placeholder="search" type="Search" onkeyup={ onSearch } onchange={ onSearch } ref="search" />
@@ -30,7 +30,7 @@
             <p class="m-0">{ block.opts.description }</p>
           </li>
         </ul>
-        
+
       </div>
       <div class="card-footer">
         <button type="button" class="btn btn-secondary float-right" onclick={ hide }>Close</button>
@@ -80,10 +80,10 @@
       // prevent default
       e.preventDefault();
       e.stopPropagation();
-      
+
       // activate block
       this.tab = e.item.tab;
-      
+
       // update view
       this.update();
     }
@@ -97,10 +97,10 @@
       // prevent default
       e.preventDefault();
       e.stopPropagation();
-      
+
       // activate block
       this.type = e.item.block.type || e.item.block.tag;
-      
+
       // update view
       this.update();
     }
@@ -113,7 +113,7 @@
     onSearch(e) {
       // check search
       this.search = this.refs.search.value;
-      
+
       // update view
       this.update();
     }
@@ -127,20 +127,20 @@
       // prevent default
       e.preventDefault();
       e.stopPropagation();
-      
+
       // set loading
       this.loading = true;
-      
+
       // update view
       this.update();
-      
+
       // add block by type
       await opts.addBlock(this.type);
-      
+
       // set loading
       this.type    = null;
       this.loading = false;
-      
+
       // close modal
       this.hide();
     }
@@ -173,7 +173,7 @@
         // Return sort
         return ('' + a.opts.title).localeCompare(b.opts.title);
       });
-      
+
       // check default
       if (category !== 'default') {
         rtn = rtn.filter((block) => {
@@ -192,11 +192,11 @@
         // check search
         return ('' + block.opts.title).toLowerCase().includes(this.search.toLowerCase());
       });
-      
+
       // return rtn
       return rtn;
     }
-    
+
     /**
      * on is active
      *
@@ -208,7 +208,7 @@
       // return type
       return this.tab === tab;
     }
-    
+
     /**
      * on is active
      *
@@ -220,6 +220,5 @@
       // return type
       return this.type === block.type;
     }
-    
   </script>
 </editable-sidebar>
