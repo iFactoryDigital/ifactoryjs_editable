@@ -134,7 +134,7 @@
 
       // check positions
       if (!this.placement.get('blocks')) this.placement.set('blocks', []);
-      
+
       // push block
       this.placement.get('blocks').push(block);
 
@@ -160,7 +160,7 @@
         // update view
         this.updateGrid();
       }
-      
+
       // delete editing
       delete block.saving;
       delete blockClone.saving;

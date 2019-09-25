@@ -70,7 +70,7 @@
       // update
       this.update();
     }
-    
+
     /**
      * on block
      *
@@ -87,7 +87,7 @@
       // update view
       this.update();
     }
-    
+
     /**
      * on block
      *
