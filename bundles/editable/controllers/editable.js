@@ -63,7 +63,7 @@ class EditableController extends Controller {
     // / return if no id
     if (!id) return null;
 
-    // add to room
+  
     return await modelHelper.deafen(opts.sessionID, await Placement.findById(id), uuid);
   }
 

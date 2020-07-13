@@ -22,6 +22,7 @@
     this.mixin('acl');
     this.mixin('model');
     this.mixin('loading');
+    this.mixin('user');
 
     // require uuid
     const uuid = require('uuid');
@@ -64,9 +65,19 @@
       e.preventDefault();
       e.stopPropagation();
       
-      // open modal
-      this.refs.sidebar.show();
-    }
+        // open modal
+        if (this.refs.sidebar) this.refs.sidebar.show();
+      }
+      
+      /**
+       * set editing
+       *
+       * @param  {Object} block
+       */
+      onEditing(block) {
+        // set editing
+        this.editing = block ? block.uuid : null;
+      }
 
     /**
      * adds block by type
@@ -76,6 +87,10 @@
      * @return {*}
      */
     async onAddBlock (type) {
+       console.log('onAddBlock');
+
+        // set type
+        if (!type) type = this.refs.sidebar.type;
       // get uuid
       const dotProp = require('dot-prop-immutable');
 
@@ -165,17 +180,17 @@
       delete block.saving;
       delete blockClone.saving;
 
-      // log data
-      const res = await fetch('/editable/placement/' + this.placement.get('id') + '/block/save', {
-        'body' : JSON.stringify({
-          'block' : blockClone
-        }),
-        'method'  : 'post',
-        'headers' : {
-          'Content-Type' : 'application/json'
-        },
-        'credentials' : 'same-origin'
-      });
+        // log data
+        const res = await fetch(`/editable/placement/${this.placement.get('id')}/block/save`, {
+          'body' : JSON.stringify({
+            'block' : blockClone
+          }),
+          'method'  : 'post',
+          'headers' : {
+            'Content-Type' : 'application/json'
+          },
+          'credentials' : 'same-origin'
+        });
 
       // load data
       const result = await res.json();
@@ -199,8 +214,61 @@
       }
     }
 
-    /**
-     * saves placement
+      /**
+       * on set block
+       */
+      async onSetBlock (block, key, value) {
+        // get uuid
+        const dotProp = require('dot-prop');
+
+        // set
+        dotProp.set(block, key, value);
+
+        // update
+        this.update();
+
+        // log data
+        const res = await fetch(`/editable/placement/${this.placement.get('id')}/block/save`, {
+          'body' : JSON.stringify({
+            'block' : block
+          }),
+          'method'  : 'post',
+          'headers' : {
+            'Content-Type' : 'application/json'
+          },
+          'credentials' : 'same-origin'
+        });
+      }
+
+      /**
+       * on refresh block
+       *
+       * @param  {Event}  e
+       * @param  {Object} block
+       */
+      async onRemoveBlock (block, data, placement) {
+        console.log('onRemoveBlock');
+        // set loading
+        block.removing = true;
+
+        // update view
+        this.update();
+
+        // get positions
+        const blocks = (this.placement.get('blocks') || []).filter((b) => b.uuid !== block.uuid);
+
+        // set blocks
+        this.placement.set('blocks', blocks);
+
+        // save placement
+        await this.savePlacement();
+
+        // remove backdrop
+        if ($('.modal-backdrop')) $('.modal-backdrop').remove();
+      }
+
+      /**
+      * saves placement
      *
      * @param {Boolean} preventRefresh
      *
@@ -252,60 +320,71 @@
       // check required
       if (!this.required) {
         // set required
-        this.required = true;
+          this.required = true;
 
-        // require ui
-        require('jquery-ui/ui/data');
-        require('jquery-ui/ui/version');
-        require('jquery-ui/ui/plugin');
-        require('jquery-ui/ui/scroll-parent');
-        require('jquery-ui/ui/safe-active-element');
-        require('jquery-ui/ui/disable-selection');
-        require('jquery-ui/ui/widget');
-        require('jquery-ui/ui/widgets/mouse');
-        require('jquery-ui/ui/widgets/resizable');
-        require('jquery-ui/ui/widgets/draggable');
+          // lodash
+          window._ = require('lodash');
 
-        // require gridstack
-        require('gridstack/dist/gridstack');
+          // require ui
+          require('jquery-ui/ui/data');
+          require('jquery-ui/ui/version');
+          require('jquery-ui/ui/plugin');
+          require('jquery-ui/ui/scroll-parent');
+          require('jquery-ui/ui/safe-blur');
+          require('jquery-ui/ui/safe-active-element');
+          require('jquery-ui/ui/disable-selection');
+          require('jquery-ui/ui/widget');
+          require('jquery-ui/ui/widgets/mouse');
+          require('jquery-ui/ui/widgets/resizable');
+          require('jquery-ui/ui/widgets/draggable');
+
+          // require gridstack
+          require('editable/public/js/gridstack');
 
         // require local
         require('editable/public/js/jquery-ui');
       }
       
       // gridstack
-      jQuery(this.refs.editable).gridstack({}).on('change', (e) => {
-        // data-gs-x="0" data-gs-y="1" data-gs-width="12" data-gs-height="4"
-        // commit to items
-        jQuery('.grid-stack-item', this.refs.editable).each((i, item) => {
+        jQuery(this.refs.editable).gridstack({
+          draggable : {
+            handle : '.move',
+          }
+        }).on('change', (e) => {
+          // check target
+          if (this.refs.editable !== e.target) return true;
+
+          // data-gs-x="0" data-gs-y="1" data-gs-width="12" data-gs-height="4"
+          // commit to items
+          jQuery('.grid-stack-item', this.refs.editable).each((i, item) => {
           // child
           const child = jQuery(item);
           const data = child.data();
 
-          // get block
-          const block = this.placement.get('blocks').find(b => b.uuid === jQuery('[data-block]', item).attr('data-block'));
-          
-          // check block
-          if (child.is('.grid-stack-item-add')) {
-            // set add grid
-            this.placement.set('add', {
-              _grid : {
+            // get block
+            const block = this.placement.get('blocks', []).find(b => b.uuid === jQuery('[data-block]', item).attr('data-block'));
+            
+            // check block
+            if (child.is('.grid-stack-item-add')) {
+              // set add grid
+              this.placement.set('add', {
+                _grid : {
+                  x : data.gsX,
+                  y : data.gsY,
+                  h : data.gsHeight,
+                  w : data.gsWidth,
+                }
+              });
+            } else {
+              // set grid
+              block._grid = {
                 x : data.gsX,
                 y : data.gsY,
                 h : data.gsHeight,
                 w : data.gsWidth,
-              }
-            });
-          } else {
-            // set grid
-            block._grid = {
-              x : data.gsX,
-              y : data.gsY,
-              h : data.gsHeight,
-              w : data.gsWidth,
-            };
-          }
-        });
+              };
+            }
+          });
 
         // save
         this.savePlacement();
@@ -319,6 +398,8 @@
      * updates grid
      */
     updateGrid() {
+        // check grid
+        if (!this.grid || !this.grid.destroy) return;
       // remove grid
       this.grid.destroy();
 
